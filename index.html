@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <?!= HtmlService.createHtmlOutputFromFile('csp').getContent(); ?>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+<script>
+  async function main() {
+    await liff.init({ liffId: "2010026333-wO6tpBt7" });
+
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    const profile = await liff.getProfile();
+    const userId = profile.userId;
+
+    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc3s6R67PVck5ZngjvAdtomqP9Xms7wDSCyYPABbWjG_SYSoQ/viewform?usp=pp_url&entry.1017240936=" + userId;
+
+    window.location.href = formUrl;
+  }
+
+  main();
+</script>
+</body>
+</html>
