@@ -14,11 +14,17 @@
       return;
     }
 
+    // LINEユーザID取得
     const profile = await liff.getProfile();
     const userId = profile.userId;
 
-    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc3s6R67PVck5ZngjvAdtomqP9Xms7wDSCyYPABbWjG_SYSoQ/viewform?usp=pp_url&entry.1017240936=" + userId;
+    // ★ Apps Script に問い合わせ（既存チェック）
+    const apiUrl = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxWxfIjmHtYgc8h2FSTWIE2vTIAUTdvjYvnyJfteZfRyx0So494y0NmDpdHsb9ppQg/exec/exec?lineId=" + userId;
 
+    const res = await fetch(apiUrl);
+    const formUrl = await res.text();  // プリフィル or 新規URL が返る
+
+    // ★ 返ってきたURLに遷移
     window.location.href = formUrl;
   }
 
