@@ -1,53 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body>
-<h2>ステップログ</h2>
-<div id="log">開始</div>
+// 10秒待つ関数
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-<script>
-  function log(msg) {
-    document.getElementById("log").innerText += "\n" + msg;
-  }
+async function main() {
+  try {
+    log("1: LIFF 初期化開始");
+    await liff.init({ liffId: "2010026333-wO6tpBt7" });
+    log("2: LIFF 初期化成功");
 
-  async function main() {
-    try {
-      log("1: LIFF 初期化開始");
-      await liff.init({ liffId: "2010026333-wO6tpBt7" });
-      log("2: LIFF 初期化成功");
-
-      if (!liff.isLoggedIn()) {
-        log("3: 未ログイン → ログインへ");
-        liff.login();
-        return;
-      }
-
-      log("4: プロフィール取得開始");
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
-      log("5: userId = " + userId);
-
-      const apiUrl =
-        "https://script.google.com/macros/s/AKfycbxWxfIjmHtYgc8h2FSTWIE2vTIAUTdvjYvnyJfteZfRyx0So494y0NmDpdHsb9ppQg/exec?lineId="
-        + userId;
-
-      log("6: fetch 開始 → " + apiUrl);
-      const res = await fetch(apiUrl);
-      const formUrl = await res.text();
-      log("7: doGet 返り値 = " + formUrl);
-
-      log("8: Googleフォームへ遷移");
-      window.location.href = formUrl;
-
-    } catch (e) {
-      log("エラー: " + e);
+    if (!liff.isLoggedIn()) {
+      log("3: 未ログイン → ログインへ");
+      liff.login();
+      return;
     }
-  }
 
-  main();
-</script>
-</body>
-</html>
+    log("4: プロフィール取得開始");
+    const profile = await liff.getProfile();
+    const userId = profile.userId;
+    log("5: userId = " + userId);
+
+    const apiUrl =
+      "https://script.google.com/macros/s/AKfycbxWxfIjmHtYgc8h2FSTWIE2vTIAUTdvjYvnyJfteZfRyx0So494y0NmDpdHsb9ppQg/exec?lineId="
+      + userId;
+
+    log("6: fetch 開始 → " + apiUrl);
+    const res = await fetch(apiUrl);
+    const formUrl = await res.text();
+    log("7: doGet 返り値 = " + formUrl);
+
+    // ★ ここで10秒待つ
+    log("8: 10秒待機開始");
+    await wait(10000);
+    log("9: 10秒待機終了 → 遷移開始");
+
+    window.location.href = encodeURI(formUrl);
+
+  } catch (e) {
+    log("エラー: " + e);
+  }
+}
