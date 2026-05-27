@@ -44,9 +44,9 @@
       const formUrl = await res.text();
       log("7: doGet 返り値 = " + formUrl);
 
-      // ★ URL を安全化（LINE 内ブラウザ対策）
-      const safeUrl = encodeURI(formUrl).replace(/#/g, "%23");
-      log("8: 安全化後URL = " + safeUrl);
+      // ★ URL をそのまま使う（encodeURI しない）
+      const safeUrl = formUrl;
+      log("8: 遷移URL = " + safeUrl);
 
       // ★ 10秒待機
       log("9: 10秒待機開始");
