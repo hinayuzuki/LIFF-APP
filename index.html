@@ -1,25 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <?!= HtmlService.createHtmlOutputFromFile('csp').getContent(); ?>
+  <meta charset="UTF-8">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
+<h2>ステップログ</h2>
+<div id="log">開始</div>
+
 <script>
+  function log(msg) {
+    document.getElementById("log").innerText += "\n" + msg;
+  }
+
+  // 10秒待つ関数
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async function main() {
-    await liff.init({ liffId: "2010026333-wO6tpBt7" });
+    try {
+      log("1: LIFF 初期化開始");
+      await liff.init({ liffId: "2010026333-wO6tpBt7" });
+      log("2: LIFF 初期化成功");
 
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
+      if (!liff.isLoggedIn()) {
+        log("3: 未ログイン → ログインへ");
+        liff.login();
+        return;
+      }
+
+      log("4: プロフィール取得開始");
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+      log("5: userId = " + userId);
+
+      const apiUrl =
+        "https://script.google.com/macros/s/AKfycbwJzLdrIERaD4rqN1K2y-1hKkNXKIrOezYQZI6Tq0nhsAs8Q38Ejag6BQMWmrWDqw/exec?lineId="
+        + userId;
+
+      log("6: fetch 開始 → " + apiUrl);
+      const res = await fetch(apiUrl);
+      const formUrl = await res.text();
+      log("7: doGet 返り値 = " + formUrl);
+
+      // ★ URL を安全化（LINE 内ブラウザ対策）
+      const safeUrl = encodeURI(formUrl).replace(/#/g, "%23");
+      log("8: 安全化後URL = " + safeUrl);
+
+      // ★ 10秒待機
+      log("9: 10秒待機開始");
+      await wait(10000);
+      log("10: 10秒待機終了 → 遷移開始");
+
+      window.location.href = safeUrl;
+
+    } catch (e) {
+      log("エラー: " + e);
     }
-
-    const profile = await liff.getProfile();
-    const userId = profile.userId;
-
-    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc3s6R67PVck5ZngjvAdtomqP9Xms7wDSCyYPABbWjG_SYSoQ/viewform?usp=pp_url&entry.1017240936=" + userId;
-
-    window.location.href = formUrl;
   }
 
   main();
