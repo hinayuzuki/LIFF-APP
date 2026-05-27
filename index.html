@@ -5,37 +5,45 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-<h2>doGet 呼び出しテスト</h2>
-<div id="result">読み込み中...</div>
+<h2>ステップログ</h2>
+<div id="log">開始</div>
 
 <script>
+  function log(msg) {
+    document.getElementById("log").innerText += "\n" + msg;
+  }
+
   async function main() {
     try {
-      // ① LIFF 初期化
+      log("1: LIFF 初期化開始");
       await liff.init({ liffId: "2010026333-wO6tpBt7" });
+      log("2: LIFF 初期化成功");
 
       if (!liff.isLoggedIn()) {
+        log("3: 未ログイン → ログインへ");
         liff.login();
         return;
       }
 
-      // ② LINEユーザーID取得
+      log("4: プロフィール取得開始");
       const profile = await liff.getProfile();
       const userId = profile.userId;
+      log("5: userId = " + userId);
 
-      // ③ doGet 呼び出し
       const apiUrl =
         "https://script.google.com/macros/s/AKfycbxWxfIjmHtYgc8h2FSTWIE2vTIAUTdvjYvnyJfteZfRyx0So494y0NmDpdHsb9ppQg/exec?lineId="
         + userId;
 
+      log("6: fetch 開始 → " + apiUrl);
       const res = await fetch(apiUrl);
-      const text = await res.text();
+      const formUrl = await res.text();
+      log("7: doGet 返り値 = " + formUrl);
 
-      // ④ 結果を画面に表示
-      document.getElementById("result").innerText = "doGet の返り値: " + text;
+      log("8: Googleフォームへ遷移");
+      window.location.href = formUrl;
 
     } catch (e) {
-      document.getElementById("result").innerText = "エラー: " + e;
+      log("エラー: " + e);
     }
   }
 
