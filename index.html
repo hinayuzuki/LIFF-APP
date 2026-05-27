@@ -17,11 +17,7 @@
     const profile = await liff.getProfile();
     const userId = profile.userId;
 
-    // ★ 正しい WebApp URL を設定
-    const apiUrl = "https://script.google.com/macros/s/AKfycbxWxfIjmHtYgc8h2FSTWIE2vTIAUTdvjYvnyJfteZfRyx0So494y0NmDpdHsb9ppQg/exec?lineId=" + userId;
-
-    const res = await fetch(apiUrl);
-    const formUrl = await res.text();
+    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc3s6R67PVck5ZngjvAdtomqP9Xms7wDSCyYPABbWjG_SYSoQ/viewform?usp=pp_url&entry.1017240936=" + userId;
 
     window.location.href = formUrl;
   }
