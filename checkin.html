@@ -59,15 +59,10 @@
               <div>BOX番号：${box}</div>
             `);
           } 
-          else if (text === "CHECKED") {
-            show(`
-              <div>お客様はすでにチェックイン済みです。</div>
-            `);
-          }
           else if (text === "NO_MATCH") {
             show(`
               <div>受付できませんでした</div>
-              <div>該当するデータがありません。</div>
+              <div>該当データがありません。</div>
             `);
           } 
           else {
