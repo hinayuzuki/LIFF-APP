@@ -4,37 +4,43 @@
   <meta charset="utf-8">
   <title>BOXチェックイン</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    body {
+      font-size: 3rem; /* ★ フォント3倍 */
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .result {
+      margin-top: 40px;
+    }
+  </style>
 </head>
 <body>
 
-<div id="log"></div>
+<div id="result" class="result"></div>
 
 <script>
   const LIFF_ID = "2010220926-voVn4JYp";
   const GAS_URL = "https://bitter-block-1a88.hinayuzuki.workers.dev/";
 
-  function log(msg) {
-    document.getElementById("log").innerHTML += `<p>${msg}</p>`;
+  function show(msg) {
+    document.getElementById("result").innerHTML = msg;
   }
-
-  log("DEBUG href: " + window.location.href);
-  log("DEBUG search: " + window.location.search);
 
   liff.init({ liffId: LIFF_ID })
     .then(() => {
 
       const urlParams = new URLSearchParams(window.location.search);
       const box = urlParams.get("box");
-      log("DEBUG box: " + box);
 
       if (!box) {
-        log("BOX番号が取得できませんでした。");
+        show("BOX番号が取得できませんでした。");
         return;
       }
 
       liff.getProfile().then(profile => {
         const lineId = profile.userId;
-        log("DEBUG lineId: " + lineId);
 
         fetch(GAS_URL, {
           method: "POST",
@@ -46,30 +52,34 @@
         })
         .then(res => res.text())
         .then(text => {
-          log("GAS Response: " + text);
 
           if (text === "OK") {
-            log(`<h2>受付が完了しました</h2>`);
-            log(`<p>BOX番号：${box}</p>`);
+            show(`
+              <div>受付が完了しました</div>
+              <div>BOX番号：${box}</div>
+            `);
           } 
           else if (text === "NO_MATCH") {
-            log(`<h2>受付できませんでした</h2>`);
-            log(`<p>該当するデータがありません。</p>`);
+            show(`
+              <div>受付できませんでした</div>
+              <div>該当データがありません。</div>
+            `);
           } 
           else {
-            log(`<h2>エラーが発生しました</h2>`);
-            log(`<p>${text}</p>`);
+            show(`
+              <div>エラーが発生しました</div>
+              <div>${text}</div>
+            `);
           }
         })
         .catch(err => {
-          log("送信エラー：" + err);
+          show("送信エラー：" + err);
         });
 
       });
     })
     .catch(err => {
-      log("LIFFの初期化に失敗しました。");
-      log("DEBUG LIFF ERROR: " + err);
+      show("LIFFの初期化に失敗しました。");
     });
 </script>
 
