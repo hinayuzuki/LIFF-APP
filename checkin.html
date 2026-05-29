@@ -45,9 +45,10 @@
             <p>BOX番号：${box}</p>
           `;
         })
-        .catch(err => {
-          document.body.innerHTML = "<h2>送信エラーが発生しました。</h2>";
-        });
+          .catch(err => {
+          document.body.innerHTML = "<h2>送信エラー：" + err + "</h2>";
+          });
+
       });
     })
     .catch(err => {
