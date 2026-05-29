@@ -7,35 +7,34 @@
 </head>
 <body>
 
+<div id="log"></div>
+
 <script>
   const LIFF_ID = "2010220926-voVn4JYp";
   const GAS_URL = "https://bitter-block-1a88.hinayuzuki.workers.dev/";
 
-  // ★ デバッグ：実際に読み込まれた URL を表示
-  document.body.innerHTML = `
-    <p>DEBUG href: ${window.location.href}</p>
-    <p>DEBUG search: ${window.location.search}</p>
-  `;
+  function log(msg) {
+    document.getElementById("log").innerHTML += `<p>${msg}</p>`;
+  }
+
+  log("DEBUG href: " + window.location.href);
+  log("DEBUG search: " + window.location.search);
 
   liff.init({ liffId: LIFF_ID })
     .then(() => {
 
       const urlParams = new URLSearchParams(window.location.search);
       const box = urlParams.get("box");
-
-      // ★ デバッグ：取得した box を表示
-      document.body.innerHTML += `<p>DEBUG box: ${box}</p>`;
+      log("DEBUG box: " + box);
 
       if (!box) {
-        document.body.innerHTML += "<h2>BOX番号が取得できませんでした。</h2>";
+        log("BOX番号が取得できませんでした。");
         return;
       }
 
       liff.getProfile().then(profile => {
         const lineId = profile.userId;
-
-        // ★ デバッグ：LINE ID を表示
-        document.body.innerHTML += `<p>DEBUG lineId: ${lineId}</p>`;
+        log("DEBUG lineId: " + lineId);
 
         fetch(GAS_URL, {
           method: "POST",
@@ -45,21 +44,21 @@
             box: box
           })
         })
-        .then(() => {
-          document.body.innerHTML += `
-            <h2>受付が完了しました</h2>
-            <p>BOX番号：${box}</p>
-          `;
+        .then(res => res.text())
+        .then(text => {
+          log("GAS Response: " + text);
+          log(`<h2>受付が完了しました</h2>`);
+          log(`<p>BOX番号：${box}</p>`);
         })
         .catch(err => {
-          document.body.innerHTML += "<h2>送信エラー：" + err + "</h2>";
+          log("送信エラー：" + err);
         });
 
       });
     })
     .catch(err => {
-      document.body.innerHTML += "<h2>LIFFの初期化に失敗しました。</h2>";
-      document.body.innerHTML += `<p>DEBUG LIFF ERROR: ${err}</p>`;
+      log("LIFFの初期化に失敗しました。");
+      log("DEBUG LIFF ERROR: " + err);
     });
 </script>
 
