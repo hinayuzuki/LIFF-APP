@@ -47,8 +47,19 @@
         .then(res => res.text())
         .then(text => {
           log("GAS Response: " + text);
-          log(`<h2>受付が完了しました</h2>`);
-          log(`<p>BOX番号：${box}</p>`);
+
+          if (text === "OK") {
+            log(`<h2>受付が完了しました</h2>`);
+            log(`<p>BOX番号：${box}</p>`);
+          } 
+          else if (text === "NO_MATCH") {
+            log(`<h2>受付できませんでした</h2>`);
+            log(`<p>該当するデータがありません。</p>`);
+          } 
+          else {
+            log(`<h2>エラーが発生しました</h2>`);
+            log(`<p>${text}</p>`);
+          }
         })
         .catch(err => {
           log("送信エラー：" + err);
