@@ -1,87 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>BOXチェックイン</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+function doPost(e) {
+  try {
+    const raw = e.postData && e.postData.contents ? e.postData.contents : "{}";
+    const data = JSON.parse(raw);
 
-  <style>
-    body {
-      font-size: 3rem; /* ★ フォント3倍 */
-      line-height: 1.6;
-      padding: 20px;
+    const lineId = data.lineId;
+    const box = Number(data.box);
+
+    const ss = SpreadsheetApp.openById("1J_FkVaRYs0quvBnZZaLH-Inj_apP5Pz-jcmkh810Fw0");
+    const sheet = ss.getSheetByName("受付");
+
+    if (!sheet) {
+      return ContentService.createTextOutput("ERROR: シートが見つかりません");
     }
-    .result {
-      margin-top: 40px;
-    }
-  </style>
-</head>
-<body>
 
-<div id="result" class="result"></div>
+    const lastRow = sheet.getLastRow();
+    const values = sheet.getRange(2, 1, lastRow - 1, 15).getValues();
 
-<script>
-  const LIFF_ID = "2010220926-voVn4JYp";
-  const GAS_URL = "https://bitter-block-1a88.hinayuzuki.workers.dev/";
+    for (let i = 0; i < values.length; i++) {
+      const row = values[i];
 
-  function show(msg) {
-    document.getElementById("result").innerHTML = msg;
-  }
+      const rowLineId = row[2];
+      const status = row[14]; // 0=未チェックイン, 1=チェックイン済み
 
-  liff.init({ liffId: LIFF_ID })
-    .then(() => {
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const box = urlParams.get("box");
-
-      if (!box) {
-        show("BOX番号が取得できませんでした。");
-        return;
+      // ★ すでにチェックイン済みの場合
+      if (rowLineId === lineId && status === 1) {
+        return ContentService.createTextOutput("CHECKED");
       }
 
-      liff.getProfile().then(profile => {
-        const lineId = profile.userId;
+      // ★ 未チェックイン → チェックイン処理
+      if (rowLineId === lineId && status === 0) {
+        const targetRow = i + 2;
 
-        fetch(GAS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            lineId: lineId,
-            box: box
-          })
-        })
-        .then(res => res.text())
-        .then(text => {
+        sheet.getRange(targetRow, 13).setValue(box);
+        sheet.getRange(targetRow, 15).setValue(1);
 
-          if (text === "OK") {
-            show(`
-              <div>受付が完了しました</div>
-              <div>BOX番号：${box}</div>
-            `);
-          } 
-          else if (text === "NO_MATCH") {
-            show(`
-              <div>受付できませんでした</div>
-              <div>該当データがありません。</div>
-            `);
-          } 
-          else {
-            show(`
-              <div>エラーが発生しました</div>
-              <div>${text}</div>
-            `);
-          }
-        })
-        .catch(err => {
-          show("送信エラー：" + err);
-        });
+        return ContentService.createTextOutput("OK");
+      }
+    }
 
-      });
-    })
-    .catch(err => {
-      show("LIFFの初期化に失敗しました。");
-    });
-</script>
+    return ContentService.createTextOutput("NO_MATCH");
 
-</body>
-</html>
+  } catch (err) {
+    return ContentService.createTextOutput("ERROR: " + err);
+  }
+}
