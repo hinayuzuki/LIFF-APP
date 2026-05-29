@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>BOXチェックイン</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+
+<script>
+  // ★ LIFF B の ID を入れる（あなたが新しく作った LIFF B）
+  const LIFF_ID = "2010220926-voVn4JYp";
+
+  // ★ GAS の Webhook URL（doPost の URL）
+  const GAS_URL = "YOUR_GAS_WEBHOOK_URL";
+
+  // LIFF 初期化
+  liff.init({ liffId: LIFF_ID })
+    .then(() => {
+      // URLパラメータから box=番号 を取得
+      const urlParams = new URLSearchParams(window.location.search);
+      const box = urlParams.get("box");
+
+      if (!box) {
+        document.body.innerHTML = "<h2>BOX番号が取得できませんでした。</h2>";
+        return;
+      }
+
+      // LINE ID を取得
+      liff.getProfile().then(profile => {
+        const lineId = profile.userId;
+
+        // GAS に送信
+        fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lineId: lineId,
+            box: box
+          })
+        })
+        .then(() => {
+          document.body.innerHTML = `
+            <h2>受付が完了しました</h2>
+            <p>BOX番号：${box}</p>
+          `;
+        })
+        .catch(err => {
+          document.body.innerHTML = "<h2>送信エラーが発生しました。</h2>";
+        });
+      });
+    })
+    .catch(err => {
+      document.body.innerHTML = "<h2>LIFFの初期化に失敗しました。</h2>";
+    });
+</script>
+
+</body>
+</html>
