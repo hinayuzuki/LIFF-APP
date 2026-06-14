@@ -50,7 +50,7 @@
 ================================ */
 const params = new URLSearchParams(location.search);
 const area = params.get("area");
-const number = params.get("number");   // ★ 修正済み
+const number = params.get("number");
 
 document.getElementById("area").textContent = area;
 document.getElementById("number").textContent = number;
@@ -89,9 +89,10 @@ initLiff().then(async id => {
   document.getElementById("placePhotoUrlText").textContent =
     json.placePhotoUrl || "URLが取得できませんでした";
 
-  // ★ URL があれば画像としても表示
+  // ★ Workers 経由で画像を表示（LINE対策）
   if (json.placePhotoUrl) {
-    document.getElementById("placePhoto").src = json.placePhotoUrl;
+    document.getElementById("placePhoto").src =
+      `https://kanryo-houkoku.hinayuzuki.workers.dev/img?url=${encodeURIComponent(json.placePhotoUrl)}`;
   }
 });
 
