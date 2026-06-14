@@ -108,7 +108,7 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
   });
 
   const json = await res.json();
-  document.getElementById("result").textContent = JSON.stringify(json);
+  document.getElementById("result").textContent = json.message || "写真登録完了しました";
 });
 </script>
 
