@@ -28,6 +28,11 @@
 <!-- ★ 置き配場所写真を表示するエリア -->
 <div class="box">
   <p>置き配場所写真：</p>
+
+  <!-- ★ URL をまず表示（デバッグ用） -->
+  <p id="placePhotoUrlText" style="word-break: break-all; color: blue;"></p>
+
+  <!-- ★ 画像表示 -->
   <img id="placePhoto" src="" alt="置き配場所写真">
 </div>
 
@@ -45,7 +50,7 @@
 ================================ */
 const params = new URLSearchParams(location.search);
 const area = params.get("area");
-const number = params.get("number");   // ★ 修正ポイント
+const number = params.get("number");   // ★ 修正済み
 
 document.getElementById("area").textContent = area;
 document.getElementById("number").textContent = number;
@@ -80,6 +85,11 @@ initLiff().then(async id => {
 
   const json = await res.json();
 
+  // ★ URL を画面に表示（デバッグ用）
+  document.getElementById("placePhotoUrlText").textContent =
+    json.placePhotoUrl || "URLが取得できませんでした";
+
+  // ★ URL があれば画像としても表示
   if (json.placePhotoUrl) {
     document.getElementById("placePhoto").src = json.placePhotoUrl;
   }
