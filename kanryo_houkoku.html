@@ -12,6 +12,7 @@
     body { font-family: sans-serif; padding: 20px; }
     .box { margin-bottom: 20px; }
     button { padding: 12px 20px; font-size: 18px; }
+    img { max-width: 100%; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
@@ -22,6 +23,12 @@
   <p>エリア：<span id="area"></span></p>
   <p>受付番号：<span id="number"></span></p>
   <p>配達員ID：<span id="userid"></span></p>
+</div>
+
+<!-- ★ 置き配場所写真を表示するエリア -->
+<div class="box">
+  <p>置き配場所写真：</p>
+  <img id="placePhoto" src="" alt="置き配場所写真">
 </div>
 
 <div class="box">
@@ -48,10 +55,9 @@ document.getElementById("number").textContent = number;
 ================================ */
 async function initLiff() {
   await liff.init({
-    liffId: "2010390191-rg24OaGf"  // ← あなたの LIFF ID
+    liffId: "2010390191-rg24OaGf"
   });
 
-  // プロフィール取得
   const profile = await liff.getProfile();
   const userId = profile.userId;
 
@@ -62,8 +68,21 @@ async function initLiff() {
 
 let deliveryUserId = null;
 
-initLiff().then(id => {
+initLiff().then(async id => {
   deliveryUserId = id;
+
+  /* ================================
+     ★ 置き配場所写真を取得（GET）
+  ================================= */
+  const res = await fetch(
+    `https://kanryo-houkoku.hinayuzuki.workers.dev/?area=${area}&number=${number}`
+  );
+
+  const json = await res.json();
+
+  if (json.placePhotoUrl) {
+    document.getElementById("placePhoto").src = json.placePhotoUrl;
+  }
 });
 
 
@@ -80,7 +99,7 @@ function toBase64(file) {
 
 
 /* ================================
-   ④ Cloudflare Workers に送信
+   ④ Cloudflare Workers に送信（POST）
 ================================ */
 document.getElementById("sendBtn").addEventListener("click", async () => {
 
@@ -103,7 +122,7 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 
   const res = await fetch("https://kanryo-houkoku.hinayuzuki.workers.dev/", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },  // ← 追加済み
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
 
