@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>配達完了登録</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ★ LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .box { margin-bottom: 20px; }
+    button { padding: 12px 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+
+<h2>📦 配達完了登録</h2>
+
+<div class="box">
+  <p>エリア：<span id="area"></span></p>
+  <p>受付番号：<span id="number"></span></p>
+  <p>配達員ID：<span id="userid"></span></p>
+</div>
+
+<div class="box">
+  <input type="file" id="photo" accept="image/*" capture="camera">
+</div>
+
+<button id="sendBtn">配達完了として送信</button>
+
+<p id="result"></p>
+
+<script>
+/* ================================
+   ① URLパラメータ取得
+================================ */
+const params = new URLSearchParams(location.search);
+const area = params.get("area");
+const number = params.get("no");
+
+document.getElementById("area").textContent = area;
+document.getElementById("number").textContent = number;
+
+/* ================================
+   ② LIFF 初期化
+================================ */
+async function initLiff() {
+  await liff.init({
+    liffId: "2010390191-rg24OaGf"  // ← あなたの LIFF ID
+  });
+
+  // プロフィール取得
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+
+  document.getElementById("userid").textContent = userId;
+
+  return userId;
+}
+
+let deliveryUserId = null;
+
+initLiff().then(id => {
+  deliveryUserId = id;
+});
+
+
+/* ================================
+   ③ base64 変換
+================================ */
+function toBase64(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(file);
+  });
+}
+
+
+/* ================================
+   ④ Cloudflare Workers に送信
+================================ */
+document.getElementById("sendBtn").addEventListener("click", async () => {
+
+  const file = document.getElementById("photo").files[0];
+  if (!file) {
+    alert("写真を選択してください");
+    return;
+  }
+
+  const base64 = await toBase64(file);
+
+  const payload = {
+    area: area,
+    number: number,
+    userId: deliveryUserId,
+    photoBase64: base64
+  };
+
+  document.getElementById("result").textContent = "送信中…";
+
+  const res = await fetch("https://kanryo-houkoku.hinayuzuki.workers.dev/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },  // ← 追加済み
+    body: JSON.stringify(payload)
+  });
+
+  const json = await res.json();
+  document.getElementById("result").textContent = JSON.stringify(json);
+});
+</script>
+
+</body>
+</html>
