@@ -30,7 +30,7 @@
   <p>置き配場所写真：</p>
 
   <!-- ★ URL をまず表示（デバッグ用） -->
-  <p id="placePhotoUrlText" style="word-break: break-all; color: blue;"></p>
+  <!-- <p id="placePhotoUrlText" style="word-break: break-all; color: blue;"></p> -->
 
   <!-- ★ 画像表示 -->
   <img id="placePhoto" src="" alt="置き配場所写真">
@@ -86,8 +86,8 @@ initLiff().then(async id => {
   const json = await res.json();
 
   // ★ URL を画面に表示（デバッグ用）
-  document.getElementById("placePhotoUrlText").textContent =
-    json.placePhotoUrl || "URLが取得できませんでした";
+  // document.getElementById("placePhotoUrlText").textContent =
+  //   json.placePhotoUrl || "URLが取得できませんでした";
 
   // ★ Workers 経由で画像を表示（LINE対策）
   if (json.placePhotoUrl) {
